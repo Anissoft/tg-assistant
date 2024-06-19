@@ -1,0 +1,15 @@
+{
+  "name": "tg-assistant-firebase",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy:functions": "npm --prefix ./functions run deploy",
+    "f": "./node_modules/.bin/firebase"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "firebase-tools": "^13.11.2"
+  }
+}
