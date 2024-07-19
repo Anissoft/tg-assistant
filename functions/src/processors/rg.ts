@@ -1,21 +1,23 @@
 import { TgClient } from "../client";
-import { Message } from "../types";
+import { Media, Message } from "../types";
 
 type GIF = {
   urls: Record<"hd" | "sd" | "thumbnail", string>;
   gallery: string | null;
   duration: number | null;
   type: 1 | 2;
+  width: number;
+  height: number;
 };
 
 export async function processMessage(message: Message, tg: TgClient) {
   if (/redgifs\.com\/(watch|ifr)/.test(message.text)) {
     const { video, photos } = await fetchRGMedia(message.text);
     if (video) {
-      await tg.sendVideo(message.chat.id, video);
+      await tg.sendVideo(message.chat.id, video.blob, video);
     }
     if (photos && photos?.length > 0) {
-      await Promise.all(photos.map((photo) => tg.sendPhoto(message.chat.id, photo)));
+      await Promise.all(photos.map((photo) => tg.sendPhoto(message.chat.id, photo.blob, photo)));
     }
   }
 }
@@ -33,7 +35,10 @@ export async function authRG() {
   return token as string;
 }
 
-export async function fetchRGMedia(url: string): Promise<{ video?: Blob; photos?: Blob[]; }> {
+export async function fetchRGMedia(url: string): Promise<{
+  video?: Media;
+  photos?: Media[];
+}> {
   const [, , id] = url.match(/(watch|ifr)\/([a-z0-9]*)(#|\?|\/|$)/) || [];
 
   if (!id) {
@@ -41,7 +46,9 @@ export async function fetchRGMedia(url: string): Promise<{ video?: Blob; photos?
   }
 
   const token = await authRG();
-  const res = await fetch(`https://api.redgifs.com/v2/gifs/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  const res = await fetch(`https://api.redgifs.com/v2/gifs/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!res.ok) {
     throw new Error(
@@ -52,7 +59,9 @@ export async function fetchRGMedia(url: string): Promise<{ video?: Blob; photos?
   const { gif } = await res.json() as { gif: GIF };
 
   if (gif.gallery) {
-    const gallery = await fetch(`https://api.redgifs.com/v2/gallery/${gif.gallery}`, { headers: { Authorization: `Bearer ${token}` } });
+    const gallery = await fetch(`https://api.redgifs.com/v2/gallery/${gif.gallery}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (!gallery.ok) {
       throw new Error(
@@ -66,9 +75,14 @@ export async function fetchRGMedia(url: string): Promise<{ video?: Blob; photos?
         (item) => fetch(item.urls.hd).then((file) => file.blob()).catch(() => false)
       )
     );
-    return { photos: files.filter(Boolean) as Blob[] };
+    return { photos: (files.filter(Boolean) as Blob[]).map((blob) => ({ blob })) };
   } else {
-    const file = await fetch(gif.urls.hd);
+    const head = await fetch(gif.urls.hd, { method: "HEAD" });
+    const file = await fetch(
+      head.ok && Number(head.headers.get("content-length")) / 1000000 > 50 ?
+        gif.urls.sd :
+        gif.urls.hd
+    );
 
     if (!file.ok) {
       throw new Error(
@@ -78,10 +92,22 @@ export async function fetchRGMedia(url: string): Promise<{ video?: Blob; photos?
 
     switch (gif.type) {
     case 2:
-      return { photos: [await file.blob()] };
+      return { photos: [{
+        blob: await file.blob(),
+        width: gif.width,
+        height: gif.height,
+        caption: url,
+      }] };
     case 1:
     default:
-      return { video: await file.blob() };
+      return {
+        video: {
+          blob: await file.blob(),
+          width: gif.width,
+          height: gif.height,
+          caption: url,
+        },
+      };
     }
   }
 }

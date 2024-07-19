@@ -27,7 +27,7 @@ module.exports = {
   ],
   rules: {
     "require-jsdoc": 0,
-    "max-len": ["error", { "code": 150 }],
+    "max-len": ["error", { "code": 110 }],
     "quotes": ["error", "double"],
     "object-curly-spacing": ["error", "always"],
     "import/no-unresolved": 0,

@@ -9,7 +9,7 @@ import { Message } from "./types";
 const HOOK_TOKEN = process.env.HOOK_TOKEN || "";
 const API_TOKEN = process.env.API_TOKEN || "";
 const ALLOWED_USERS = process.env.ALLOWED_USERS?.split(";") || [];
-const client = new TgClient(API_TOKEN);
+const tg = new TgClient(API_TOKEN);
 
 export const onMessage = onRequest(async (request, response) => {
   const { message }: { message: Message } = request.body;
@@ -29,11 +29,13 @@ export const onMessage = onRequest(async (request, response) => {
 
   try {
     await Promise.all([
-      rg.processMessage(message, client),
+      rg.processMessage(message, tg),
       // ig.processMessage(message, client),
     ]);
+
+    await tg.deleteMessage(message.chat.id, message.message_id);
   } catch (error) {
-    client.sendMessage(message.chat.id, (error as Error).message);
+    tg.sendMessage(message.chat.id, (error as Error).message);
     logger.error((error as Error).message);
   }
 

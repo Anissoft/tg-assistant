@@ -1,4 +1,5 @@
 export interface Message {
+  message_id: string;
   chat: {
     id: number | string;
   };
@@ -6,4 +7,12 @@ export interface Message {
     username: string;
   }
   text: string;
+}
+
+
+export interface Media {
+  blob: Blob;
+  height?: number;
+  width?: number;
+  caption?: string;
 }
