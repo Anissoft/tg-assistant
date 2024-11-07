@@ -3,7 +3,7 @@ import * as logger from "firebase-functions/logger";
 
 import { TgClient } from "./client";
 import * as rg from "./processors/rg";
-// import * as ig from "./processors/ig";
+import * as ig from "./processors/ig";
 import { Message } from "./types";
 
 const HOOK_TOKEN = process.env.HOOK_TOKEN || "";
@@ -30,7 +30,7 @@ export const onMessage = onRequest(async (request, response) => {
   try {
     await Promise.all([
       rg.processMessage(message, tg),
-      // ig.processMessage(message, client),
+      ig.processMessage(message, tg),
     ]);
 
     await tg.deleteMessage(message.chat.id, message.message_id);

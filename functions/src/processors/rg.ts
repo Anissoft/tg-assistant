@@ -96,7 +96,6 @@ export async function fetchRGMedia(url: string): Promise<{
         blob: await file.blob(),
         width: gif.width,
         height: gif.height,
-        caption: url,
       }] };
     case 1:
     default:
@@ -105,7 +104,6 @@ export async function fetchRGMedia(url: string): Promise<{
           blob: await file.blob(),
           width: gif.width,
           height: gif.height,
-          caption: url,
         },
       };
     }
