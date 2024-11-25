@@ -1,9 +1,13 @@
 import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
-import { TgClient } from "./client";
+import "./clients/firebase";
+import { TgClient } from "./clients/telegram";
+
 import * as rg from "./processors/rg";
 import * as ig from "./processors/ig";
+import * as commands from "./processors/commands";
+
 import { Message } from "./types";
 
 const HOOK_TOKEN = process.env.HOOK_TOKEN || "";
@@ -31,11 +35,13 @@ export const onMessage = onRequest(async (request, response) => {
     await Promise.all([
       rg.processMessage(message, tg),
       ig.processMessage(message, tg),
+      commands.processMessage(message, tg),
     ]);
-
-    await tg.deleteMessage(message.chat.id, message.message_id);
   } catch (error) {
-    tg.sendMessage(message.chat.id, (error as Error).message);
+    tg.sendMessage(
+      message.chat.id,
+      (error as Error).message,
+    );
     logger.error((error as Error).message);
   }
 

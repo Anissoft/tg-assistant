@@ -1,4 +1,4 @@
-import { TgClient } from "../client";
+import { TgClient } from "../clients/telegram";
 import { Media, Message } from "../types";
 
 const MAX_RETRIES = 10;
@@ -12,6 +12,7 @@ export async function processMessage(message: Message, tg: TgClient) {
     if (photos && photos?.length > 0) {
       await Promise.all(photos.map((photo) => tg.sendPhoto(message.chat.id, photo.blob, photo)));
     }
+    await tg.deleteMessage(message.chat.id, message.message_id);
   }
 }
 

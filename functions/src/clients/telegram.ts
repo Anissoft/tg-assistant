@@ -12,7 +12,7 @@ export class TgClient {
 
     if (!result.ok) {
       throw new Error(
-        `Request ${result.url} failed - [${result.status}:${result.statusText}] - ${await result.text()}`
+        `SendMessage failed - [${result.status}:${result.statusText}] - ${await result.text()}`
       );
     }
 
@@ -30,7 +30,7 @@ export class TgClient {
 
     if (!result.ok) {
       throw new Error(
-        `Request ${result.url} failed - [${result.status}:${result.statusText}] - ${await result.text()}`
+        `DeleteMessage failed - [${result.status}:${result.statusText}] - ${await result.text()}`
       );
     }
 
@@ -63,7 +63,7 @@ export class TgClient {
 
     if (!result.ok) {
       throw new Error(
-        `Request ${result.url} failed - [${result.status}:${result.statusText}] - ${await result.text()}`
+        `SendVideo failed - [${result.status}:${result.statusText}] - ${await result.text()}`
       );
     }
 
@@ -95,7 +95,7 @@ export class TgClient {
 
     if (!result.ok) {
       throw new Error(
-        `Request ${result.url} failed - [${result.status}:${result.statusText}] - ${await result.text()}`
+        `SendPhoto failed - [${result.status}:${result.statusText}] - ${await result.text()}`
       );
     }
 

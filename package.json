@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev:functions": "firebase emulators:start --only functions",
     "deploy:functions": "npm --prefix ./functions run deploy",
     "f": "./node_modules/.bin/firebase"
   },
