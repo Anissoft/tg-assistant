@@ -11,7 +11,11 @@ type GIF = {
 };
 
 export async function processMessage(message: Message, tg: TgClient) {
-  if (/redgifs\.com\/(watch|ifr)/.test(message.text)) {
+  if (!/redgifs\.com\/(watch|ifr)/.test(message.text)) {
+    return;
+  }
+
+  try {
     const { video, photos } = await fetchRGMedia(message.text);
     if (video) {
       await tg.sendVideo(message.chat.id, video.blob, video);
@@ -20,6 +24,8 @@ export async function processMessage(message: Message, tg: TgClient) {
       await Promise.all(photos.map((photo) => tg.sendPhoto(message.chat.id, photo.blob, photo)));
     }
     await tg.deleteMessage(message.chat.id, message.message_id);
+  } catch (error) {
+    await tg.sendMessage(message.chat.id, (error as Error).message);
   }
 }
 
@@ -93,11 +99,13 @@ export async function fetchRGMedia(url: string): Promise<{
 
     switch (gif.type) {
     case 2:
-      return { photos: [{
-        blob: await file.blob(),
-        width: gif.width,
-        height: gif.height,
-      }] };
+      return {
+        photos: [{
+          blob: await file.blob(),
+          width: gif.width,
+          height: gif.height,
+        }],
+      };
     case 1:
     default:
       return {

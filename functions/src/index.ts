@@ -33,8 +33,8 @@ export const onMessage = onRequest(async (request, response) => {
 
   try {
     await Promise.all([
-      rg.processMessage(message, tg),
       ig.processMessage(message, tg),
+      rg.processMessage(message, tg),
       commands.processMessage(message, tg),
     ]);
   } catch (error) {

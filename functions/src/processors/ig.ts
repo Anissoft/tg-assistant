@@ -4,7 +4,11 @@ import { Media, Message } from "../types";
 const MAX_RETRIES = 10;
 
 export async function processMessage(message: Message, tg: TgClient) {
-  if (/instagram\.com\//.test(message.text)) {
+  if (!/instagram\.com\//.test(message.text)) {
+    return;
+  }
+
+  try {
     const { video, photos } = await fetchIGMedia(message.text);
     if (video) {
       await tg.sendVideo(message.chat.id, video.blob, video);
@@ -13,6 +17,8 @@ export async function processMessage(message: Message, tg: TgClient) {
       await Promise.all(photos.map((photo) => tg.sendPhoto(message.chat.id, photo.blob, photo)));
     }
     await tg.deleteMessage(message.chat.id, message.message_id);
+  } catch (error) {
+    await tg.sendMessage(message.chat.id, (error as Error).message);
   }
 }
 
