@@ -42,7 +42,7 @@ export async function processMessage(message: Message, tg: TgClient) {
       if (list === "") {
         await tg.sendMessage(message.chat.id, "/list is empty");
       } else {
-        const formattedList = list.split(";").map((item) => `- ${item}\n`);
+        const formattedList = list.split(";").map((item) => `- \`${item}\`\n`);
         await tg.sendMessage(
           message.chat.id,
           `/list currently contains ${formattedList.length} items:\n${formattedList.join("")}`
@@ -53,9 +53,9 @@ export async function processMessage(message: Message, tg: TgClient) {
 
     if (message.text.startsWith("/remove")) {
       if (!item) {
-        await tg.sendMessage(message.chat.id, "Please specify item to remove (eg. /remove eggs)");
+        await tg.sendMessage(message.chat.id, "Please specify items to remove (eg. /remove eggs)");
       } else {
-        await db.set(list.split(";").filter((candidate) => candidate !== item).join(";"));
+        await db.set(list.split(";").filter((candidate) => !item.includes(candidate)).join(";"));
         await tg.sendMessage(
           message.chat.id,
           `Removed "${item.split(";").join("\",\"")}" from the /list`
